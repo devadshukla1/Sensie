@@ -5,7 +5,10 @@ import re
 
 ROOT = Path(__file__).resolve().parent
 
-REQUIRED_FILES = [ROOT / "SKILL.md", ROOT / "README.md"]
+REQUIRED_FILES = [
+    ROOT / "SKILL.md",
+    ROOT / "README.md",
+]
 
 REQUIRED_SECTIONS = [
     "# Sensie",
@@ -23,11 +26,17 @@ REQUIRED_SECTIONS = [
 ]
 
 REQUIRED_SAFEGUARDS = [
-    "Do not invent requirements.",
-    "Never fabricate an API, version, parameter, benchmark, capability, or compatibility claim.",
-    "Do not claim impossible absolute accuracy",
-    "Avoid unnecessary abstractions",
-    "STOP",
+    ("Do not invent requirements.", "Do not invent requirements."),
+    (
+        "Never fabricate an API, version, parameter, benchmark, capability, or compatibility claim.",
+        "Never fabricate an API, version, parameter, benchmark, capability, or compatibility claim.",
+    ),
+    (
+        "Do not claim impossible absolute accuracy",
+        "Do not claim impossible absolute accuracy",
+    ),
+    ("Avoid unnecessary abstractions", "Avoid unnecessary abstractions"),
+    ("STOP", "STOP"),
 ]
 
 
@@ -74,8 +83,8 @@ def validate_skill(skill: str) -> None:
         if phrase not in body:
             raise AssertionError(f"SKILL.md missing required concept: {phrase}")
 
-    for safeguard in REQUIRED_SAFEGUARDS:
-        if safeguard not in body:
+    for safeguard, required_text in REQUIRED_SAFEGUARDS:
+        if required_text not in body:
             raise AssertionError(f"SKILL.md missing safeguard: {safeguard}")
 
 
@@ -84,7 +93,8 @@ def validate_readme(readme: str) -> None:
         if section not in readme:
             raise AssertionError(f"README.md missing section: {section}")
 
-    for item in ["mermaid", "Two Sum", "Differential testing"]:
+    required_content = ["mermaid", "Two Sum", "Differential testing"]
+    for item in required_content:
         if item not in readme:
             raise AssertionError(f"README.md missing required content: {item}")
 
@@ -92,8 +102,10 @@ def validate_readme(readme: str) -> None:
 def validate() -> None:
     skill = read(ROOT / "SKILL.md")
     readme = read(ROOT / "README.md")
+
     for path in REQUIRED_FILES:
         read(path)
+
     validate_skill(skill)
     validate_readme(readme)
     print("Sensie validation passed.")
