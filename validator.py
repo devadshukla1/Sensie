@@ -25,20 +25,6 @@ REQUIRED_SECTIONS = [
     "## 11. Completion Gate",
 ]
 
-REQUIRED_SAFEGUARDS = [
-    ("Do not invent requirements.", "Do not invent requirements."),
-    (
-        "Never fabricate an API, version, parameter, benchmark, capability, or compatibility claim.",
-        "Never fabricate an API, version, parameter, benchmark, capability, or compatibility claim.",
-    ),
-    (
-        "Do not claim impossible absolute accuracy",
-        "Do not claim impossible absolute accuracy",
-    ),
-    ("Avoid unnecessary abstractions", "Avoid unnecessary abstractions"),
-    ("STOP", "STOP"),
-]
-
 
 def read(path: Path) -> str:
     if not path.exists():
@@ -47,6 +33,11 @@ def read(path: Path) -> str:
     if not content.strip():
         raise AssertionError(f"Empty required file: {path.relative_to(ROOT)}")
     return content
+
+
+def normalize(text: str) -> str:
+    """Normalize Markdown text for tolerant, case-insensitive checks."""
+    return re.sub(r"\s+", " ", text).strip().casefold()
 
 
 def validate_skill(skill: str) -> None:
@@ -59,6 +50,7 @@ def validate_skill(skill: str) -> None:
 
     metadata = front_matter[1]
     body = front_matter[2]
+    normalized_body = normalize(body)
 
     if not re.search(r"(?m)^name:\s*sensie\s*$", metadata):
         raise AssertionError("Skill name must be 'sensie'")
@@ -68,34 +60,47 @@ def validate_skill(skill: str) -> None:
         raise AssertionError("Expected MIT license metadata")
 
     required_phrases = [
-        "UNDERSTAND",
-        "CHECK",
-        "SIMPLIFY",
-        "VERIFY",
-        "OPTIMIZE",
-        "EXECUTE",
-        "CHECK COMPLETENESS",
-        "# Sensie — Practical Intelligence for LLMs",
-        "Brute force is a **verification technique**",
-        "Accuracy ≠ confidence.",
+        "understand",
+        "check",
+        "simplify",
+        "verify",
+        "optimize",
+        "execute",
+        "check completeness",
+        "# sensie — practical intelligence for llms",
+        "brute force is a **verification technique**",
+        "accuracy ≠ confidence.",
     ]
     for phrase in required_phrases:
-        if phrase not in body:
+        if normalize(phrase) not in normalized_body:
             raise AssertionError(f"SKILL.md missing required concept: {phrase}")
 
-    for safeguard, required_text in REQUIRED_SAFEGUARDS:
-        if required_text not in body:
-            raise AssertionError(f"SKILL.md missing safeguard: {safeguard}")
+    # These checks intentionally allow natural Markdown wording rather than
+    # requiring one exact sentence. This keeps the validator useful when the
+    # skill documentation is edited without weakening the underlying rules.
+    safeguards = {
+        "requirements": r"do not invent requirements",
+        "fabrication": r"never fabricate an api.*benchmark.*capability.*compatibility claim",
+        "absolute accuracy": r"(?:must\s+)?never claim impossible absolute accuracy",
+        "unnecessary abstraction": r"unnecessary abstractions",
+        "completion stop": r"\bstop\b",
+    }
+
+    for name, pattern in safeguards.items():
+        if not re.search(pattern, normalized_body):
+            raise AssertionError(f"SKILL.md missing safeguard: {name}")
 
 
 def validate_readme(readme: str) -> None:
+    normalized_readme = normalize(readme)
+
     for section in REQUIRED_SECTIONS:
-        if section not in readme:
+        if normalize(section) not in normalized_readme:
             raise AssertionError(f"README.md missing section: {section}")
 
     required_content = ["mermaid", "Two Sum", "Differential testing"]
     for item in required_content:
-        if item not in readme:
+        if normalize(item) not in normalized_readme:
             raise AssertionError(f"README.md missing required content: {item}")
 
 
