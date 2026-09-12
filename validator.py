@@ -5,10 +5,7 @@ import re
 
 ROOT = Path(__file__).resolve().parent
 
-REQUIRED_FILES = [
-    ROOT / "SKILL.md",
-    ROOT / "README.md",
-]
+REQUIRED_FILES = [ROOT / "SKILL.md", ROOT / "README.md"]
 
 REQUIRED_SECTIONS = [
     "# Sensie",
@@ -87,8 +84,7 @@ def validate_readme(readme: str) -> None:
         if section not in readme:
             raise AssertionError(f"README.md missing section: {section}")
 
-    required_content = ["mermaid", "Two Sum", "Differential testing"]
-    for item in required_content:
+    for item in ["mermaid", "Two Sum", "Differential testing"]:
         if item not in readme:
             raise AssertionError(f"README.md missing required content: {item}")
 
@@ -96,10 +92,8 @@ def validate_readme(readme: str) -> None:
 def validate() -> None:
     skill = read(ROOT / "SKILL.md")
     readme = read(ROOT / "README.md")
-
     for path in REQUIRED_FILES:
         read(path)
-
     validate_skill(skill)
     validate_readme(readme)
     print("Sensie validation passed.")
