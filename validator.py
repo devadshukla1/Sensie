@@ -69,7 +69,7 @@ def validate_skill(skill: str) -> None:
         "OPTIMIZE",
         "EXECUTE",
         "CHECK COMPLETENESS",
-        "Stop",
+        "# Sensie — Practical Intelligence for LLMs",
         "Brute force is a **verification technique**",
         "Accuracy ≠ confidence.",
     ]
@@ -87,10 +87,10 @@ def validate_readme(readme: str) -> None:
         if section not in readme:
             raise AssertionError(f"README.md missing section: {section}")
 
-    required_visuals = ["mermaid", "Two Sum", "Differential testing"]
-    for visual in required_visuals:
-        if visual not in readme:
-            raise AssertionError(f"README.md missing required content: {visual}")
+    required_content = ["mermaid", "Two Sum", "Differential testing"]
+    for item in required_content:
+        if item not in readme:
+            raise AssertionError(f"README.md missing required content: {item}")
 
 
 def validate() -> None:
